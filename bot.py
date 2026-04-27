@@ -11,7 +11,8 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.storage.memory import MemoryStorage
 
 SCOPES=["https://spreadsheets.google.com/feeds","https://www.googleapis.com/auth/drive"]
-creds=Credentials.from_service_account_file("credentials.json",scopes=SCOPES)
+import json as _json
+creds=Credentials.from_service_account_info(_json.loads(os.getenv("GOOGLE_CREDENTIALS","{}")),scopes=SCOPES)
 gs=gspread.authorize(creds)
 sheet=gs.open_by_key("10GU7L3gD840tNQemw8jrxegn454PqxwYIfvjm_ZAByg").sheet1
 
