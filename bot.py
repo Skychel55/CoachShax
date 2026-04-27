@@ -68,6 +68,9 @@ async def booking_who(message: Message, state: FSMContext):
 
 @dp.message(BookingForm.day)
 async def booking_day(message: Message, state: FSMContext):
+    if message.text not in ["Вторник","Четверг","Суббота","Воскресенье"]:
+        await message.answer("Выберите день из кнопок")
+        return
     await state.update_data(day=message.text)
     await state.set_state(BookingForm.time)
     time_kb = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text='09:00')],[KeyboardButton(text='11:00')],[KeyboardButton(text='13:00')],[KeyboardButton(text='15:00')],[KeyboardButton(text='17:00')],[KeyboardButton(text='19:00')]], resize_keyboard=True)
