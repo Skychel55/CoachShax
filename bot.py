@@ -1,6 +1,7 @@
 import asyncio
 import gspread
-from googleapiclient.discovery import build
+from datetime import datetime, timedelta
+from datetime import datetime, timedelta
 from google.oauth2.service_account import Credentials
 import os
 from aiogram import Bot, Dispatcher, F
@@ -11,11 +12,10 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.storage.memory import MemoryStorage
 
-SCOPES=["https://spreadsheets.google.com/feeds","https://www.googleapis.com/auth/drive","https://www.googleapis.com/auth/calendar"]
+SCOPES=["https://spreadsheets.google.com/feeds","https://www.googleapis.com/auth/drive"]
 import json as _json
 creds=Credentials.from_service_account_info(_json.loads(os.getenv("GOOGLE_CREDENTIALS","{}")),scopes=SCOPES)
 gs=gspread.authorize(creds)
-calendar=build("calendar","v3",credentials=creds)
 sheet=gs.open_by_key("10GU7L3gD840tNQemw8jrxegn454PqxwYIfvjm_ZAByg").sheet1
 
 BOT_TOKEN = os.getenv('BOT_TOKEN', '')
@@ -72,18 +72,26 @@ async def booking_phone(message: Message, state: FSMContext):
 @dp.message(BookingForm.who)
 async def booking_who(message: Message, state: FSMContext):
     await state.update_data(who=message.text)
-    day_kb = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text='Вторник')],[KeyboardButton(text='Четверг')],[KeyboardButton(text='Суббота')],[KeyboardButton(text='Воскресенье')]], resize_keyboard=True)
+    from datetime import datetime,timedelta
+    today=datetime.now()
+    days=[]
+    for i in range(14):
+        d=today+timedelta(days=i+1)
+        if d.weekday() in [1,3,5,6]:
+            days.append(d.strftime("%d.%m %A").replace("Tuesday","Вт").replace("Thursday","Чт").replace("Saturday","Сб").replace("Sunday","Вс"))
+        if len(days)>=4:break
+    day_kb=ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text=d)] for d in days],resize_keyboard=True)
     await state.set_state(BookingForm.day)
     await message.answer('Выберите день:', reply_markup=day_kb)
 
 @dp.message(BookingForm.day)
 async def booking_day(message: Message, state: FSMContext):
-    if message.text not in ["Вторник","Четверг","Суббота","Воскресенье"]:
+    if not any(c.isdigit() for c in message.text):
         await message.answer("Выберите день из кнопок")
         return
     await state.update_data(day=message.text)
     await state.set_state(BookingForm.time)
-    time_kb = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text='09:00')],[KeyboardButton(text='11:00')],[KeyboardButton(text='13:00')],[KeyboardButton(text='15:00')],[KeyboardButton(text='17:00')],[KeyboardButton(text='19:00')]], resize_keyboard=True)
+    time_kb = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text='10:00')],[KeyboardButton(text='12:00')],[KeyboardButton(text='14:00')],[KeyboardButton(text='16:00')]], resize_keyboard=True)
     await message.answer('Выберите время:', reply_markup=time_kb)
 
 @dp.message(BookingForm.time)
@@ -92,9 +100,7 @@ async def booking_time(message: Message, state: FSMContext):
     data = await state.get_data()
     await state.clear()
     summary = f'Заявка принята.\nИмя: {data["name"]}\nТелефон: {data["phone"]}\nДень: {data["day"]}\nВремя: {data["time"]}'
-    CAL_ID=os.getenv(chr(67)+chr(65)+chr(76)+chr(69)+chr(78)+chr(68)+chr(65)+chr(82)+chr(95)+chr(73)+chr(68),chr(112)+chr(114)+chr(105)+chr(109)+chr(97)+chr(114)+chr(121))
     sheet.append_row([data["name"], data["phone"], data["day"], data["time"]])
-    calendar.events().insert(calendarId=CAL_ID,body={"summary":"Тренировка: "+data["name"],"start":{"dateTime":"2025-01-01T09:00:00","timeZone":"Europe/Moscow"},"end":{"dateTime":"2025-01-01T10:00:00","timeZone":"Europe/Moscow"}}).execute()
     await message.answer(summary, reply_markup=main_menu)
 
 async def main():
