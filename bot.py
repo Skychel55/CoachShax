@@ -1,4 +1,6 @@
 import asyncio
+import gspread
+from google.oauth2.service_account import Credentials
 import os
 from aiogram import Bot, Dispatcher, F
 from aiogram.filters import Command
@@ -7,6 +9,11 @@ from aiogram.client.session.aiohttp import AiohttpSession
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.storage.memory import MemoryStorage
+
+SCOPES=["https://spreadsheets.google.com/feeds","https://www.googleapis.com/auth/drive"]
+creds=Credentials.from_service_account_file("credentials.json",scopes=SCOPES)
+gs=gspread.authorize(creds)
+sheet=gs.open_by_key("10GU7L3gD840tNQemw8jrxegn454PqxwYIfvjm_ZAByg").sheet1
 
 BOT_TOKEN = os.getenv('BOT_TOKEN', '')
 dp = Dispatcher(storage=MemoryStorage())
@@ -82,6 +89,7 @@ async def booking_time(message: Message, state: FSMContext):
     data = await state.get_data()
     await state.clear()
     summary = f'Заявка принята.\nИмя: {data["name"]}\nТелефон: {data["phone"]}\nДень: {data["day"]}\nВремя: {data["time"]}'
+    sheet.append_row([data["name"], data["phone"], data["day"], data["time"]])
     await message.answer(summary, reply_markup=main_menu)
 
 async def main():
