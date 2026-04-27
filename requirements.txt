@@ -2,3 +2,4 @@ aiogram==3.27.0
 aiohttp-socks
 gspread
 google-auth
+google-api-python-client

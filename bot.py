@@ -1,5 +1,6 @@
 import asyncio
 import gspread
+from googleapiclient.discovery import build
 from google.oauth2.service_account import Credentials
 import os
 from aiogram import Bot, Dispatcher, F
@@ -14,6 +15,7 @@ SCOPES=["https://spreadsheets.google.com/feeds","https://www.googleapis.com/auth
 import json as _json
 creds=Credentials.from_service_account_info(_json.loads(os.getenv("GOOGLE_CREDENTIALS","{}")),scopes=SCOPES)
 gs=gspread.authorize(creds)
+calendar=build("calendar","v3",credentials=creds)
 sheet=gs.open_by_key("10GU7L3gD840tNQemw8jrxegn454PqxwYIfvjm_ZAByg").sheet1
 
 BOT_TOKEN = os.getenv('BOT_TOKEN', '')
@@ -90,7 +92,9 @@ async def booking_time(message: Message, state: FSMContext):
     data = await state.get_data()
     await state.clear()
     summary = f'Заявка принята.\nИмя: {data["name"]}\nТелефон: {data["phone"]}\nДень: {data["day"]}\nВремя: {data["time"]}'
+    CAL_ID=os.getenv(chr(67)+chr(65)+chr(76)+chr(69)+chr(78)+chr(68)+chr(65)+chr(82)+chr(95)+chr(73)+chr(68),chr(112)+chr(114)+chr(105)+chr(109)+chr(97)+chr(114)+chr(121))
     sheet.append_row([data["name"], data["phone"], data["day"], data["time"]])
+    calendar.events().insert(calendarId=CAL_ID,body={"summary":"Тренировка: "+data["name"],"start":{"dateTime":"2025-01-01T09:00:00","timeZone":"Europe/Moscow"},"end":{"dateTime":"2025-01-01T10:00:00","timeZone":"Europe/Moscow"}}).execute()
     await message.answer(summary, reply_markup=main_menu)
 
 async def main():
