@@ -8,6 +8,8 @@ from aiogram import Bot, Dispatcher, F
 from aiogram.filters import Command
 from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton
 from aiogram.client.session.aiohttp import AiohttpSession
+from aiohttp import web
+from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.storage.memory import MemoryStorage
@@ -108,7 +110,15 @@ async def main():
     session = AiohttpSession()
     bot = Bot(token=BOT_TOKEN, session=session)
     print('Бот запущен')
-    await dp.start_polling(bot)
+    await bot.set_webhook("https://coachshax-production.up.railway.app/webhook")
+    app=web.Application()
+    SimpleRequestHandler(dispatcher=dp,bot=bot).register(app,path="/webhook")
+    setup_application(app,dp,bot=bot)
+    runner=web.AppRunner(app)
+    await runner.setup()
+    site=web.TCPSite(runner,host="0.0.0.0",port=8080)
+    await site.start()
+    await asyncio.Event().wait()
 
 if __name__ == '__main__':
     asyncio.run(main())
