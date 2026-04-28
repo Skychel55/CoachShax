@@ -21,6 +21,7 @@ gs=gspread.authorize(creds)
 sheet=gs.open_by_key("10GU7L3gD840tNQemw8jrxegn454PqxwYIfvjm_ZAByg").sheet1
 
 BOT_TOKEN = os.getenv('BOT_TOKEN', '')
+bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher(storage=MemoryStorage())
 
 main_menu = ReplyKeyboardMarkup(keyboard=[
@@ -108,7 +109,6 @@ async def booking_time(message: Message, state: FSMContext):
 
 async def main():
     session = AiohttpSession()
-    bot = Bot(token=BOT_TOKEN, session=session)
     print('Бот запущен')
     await bot.set_webhook("https://coachshax-production.up.railway.app/webhook")
     app=web.Application()
