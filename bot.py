@@ -101,6 +101,11 @@ async def booking_time(message: Message, state: FSMContext):
     await state.clear()
     summary = f'Заявка принята.\nИмя: {data["name"]}\nТелефон: {data["phone"]}\nДень: {data["day"]}\nВремя: {data["time"]}'
     sheet.append_row([data["name"], data["phone"], data["day"], data["time"]])
+    await bot.send_message(482803603, "Новая заявка
+" + data["name"] + "
+" + data["phone"] + "
+" + data["day"] + "
+" + data["time"])
     await message.answer(summary, reply_markup=main_menu)
 
 async def main():
