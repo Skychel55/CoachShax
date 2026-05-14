@@ -29,6 +29,7 @@ main_menu = ReplyKeyboardMarkup(keyboard=[
     [KeyboardButton(text='👤 О тренере')],
     [KeyboardButton(text='💰 Мои тренировки')],
     [KeyboardButton(text='📦 Купить пакет')],
+    [KeyboardButton(text='📱 Мои соцсети')],
 ], resize_keyboard=True)
 
 class BookingForm(StatesGroup):
@@ -50,6 +51,10 @@ async def about(message: Message):
 async def packages(message: Message):
     await message.answer('Пакеты тренировок:\n\n1 тренировка — 4 000 руб.\n4 тренировки — 13 000 руб. (экономия 3 000 руб.)\n8 тренировок — 25 000 руб. (экономия 7 000 руб.)\n\nДля записи нажмите: Записаться на тренировку')
 
+
+@dp.message(F.text == '📱 Мои соцсети')
+async def socials(message: Message):
+    await message.answer("📱 Мои соцсети:\n\nInstagram: https://www.instagram.com/coach_shax\nTikTok: https://www.tiktok.com/@coach_shax\nTelegram: https://t.me/CoachShax")
 @dp.message(F.text == '💰 Мои тренировки')
 async def my_sessions(message: Message):
     await message.answer('Для просмотра ваших тренировок обратитесь к тренеру.')
