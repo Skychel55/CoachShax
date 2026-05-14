@@ -112,6 +112,32 @@ async def booking_time(message: Message, state: FSMContext):
     await bot.send_message(482803603, "Новая заявка " + data["name"] + " " + data["phone"] + " " + data["day"] + " " + data["time"])
     await message.answer(summary, reply_markup=main_menu)
 
+@dp.message(Command("add"))
+async def add_package(message: Message):
+    if message.from_user.id != 482803603: return
+    args = message.text.split()[1:]; name = " ".join(args[:-1]); count = int(args[-1])
+    rows = sheet.get_all_values(); found = False
+    for i, row in enumerate(rows):
+        if name.lower() in row[0].lower(): sheet.update_cell(i+1, 5, count); found = True; break
+    await message.answer("✅ Пакет добавлен: " + name + " — " + str(count) + " тренировок" if found else "❌ Клиент не найден")
+@dp.message(Command("done"))
+async def done_session(message: Message):
+    if message.from_user.id != 482803603: return
+    name = " ".join(message.text.split()[1:])
+    rows = sheet.get_all_values(); found = False
+    for i, row in enumerate(rows):
+        if name.lower() in row[0].lower(): current = int(row[5]) if row[5] else 0; sheet.update_cell(i+1, 6, current+1); found = True; left = int(row[4]) - (current+1) if row[4] else 0; await message.answer("✅ Тренировка засчитана. Осталось: " + str(left)); break
+    if not found: await message.answer("❌ Клиент не найден")
+@dp.message(Command("clients"))
+async def clients_list(message: Message):
+    if message.from_user.id != 482803603: return
+    rows = sheet.get_all_values()[1:]; text = "📋 Клиенты:
+    for row in rows:
+        if row[0]: left = int(row[4])-int(row[5]) if row[4] and row[5] else row[4] if row[4] else "?"; text += row[0] + " — осталось: " + str(left) + "
+    await message.answer(text if len(text) > 15 else "Клиентов пока нет")
+"
+
+"
 async def main():
     session = AiohttpSession()
     print('Бот запущен')
