@@ -140,7 +140,7 @@ async def done_session(message: Message):
     name = " ".join(message.text.split()[1:])
     rows = sheet.get_all_values(); found = False
     for i, row in enumerate(rows):
-        if name.lower() in row[0].lower(): current = int(row[5]) if row[5] else 0; sheet.update_cell(i+1, 6, current+1); found = True; left = int(row[4]) - (current+1) if row[4] else 0; await message.answer("✅ Тренировка засчитана. Осталось: " + str(left)); break
+        if name.lower() in row[0].lower(): current = int(row[5]) if row[5] else 0; sheet.update_cell(i+1, 6, current+1); found = True; left = int(row[4]) - (current+1) if row[4] else 0; await message.answer("Тренировка засчитана. Осталось: " + str(left)); await bot.send_message(482803603, "ВНИМАНИЕ: У " + row[0] + " осталась 1 тренировка! Предложи купить пакет.") if left == 1 else None; break
     if not found: await message.answer("❌ Клиент не найден")
 @dp.message(Command("clients"))
 async def clients_list(message: Message):
