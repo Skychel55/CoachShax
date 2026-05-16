@@ -130,14 +130,10 @@ async def done_session(message: Message):
     if not found: await message.answer("❌ Клиент не найден")
 @dp.message(Command("clients"))
 async def clients_list(message: Message):
-    if message.from_user.id != 482803603: return
-    rows = sheet.get_all_values()[1:]; text = "📋 Клиенты:
+    rows = sheet.get_all_values()[1:]; text = "Клиенты:\n\n"
     for row in rows:
-        if row[0]: left = int(row[4])-int(row[5]) if row[4] and row[5] else row[4] if row[4] else "?"; text += row[0] + " — осталось: " + str(left) + "
+        if row[0]: left = int(row[4])-int(row[5]) if row[4] and row[5] else row[4] if row[4] else "?"; text += row[0] + " - ostalось: " + str(left) + "\n"
     await message.answer(text if len(text) > 15 else "Клиентов пока нет")
-"
-
-"
 async def main():
     session = AiohttpSession()
     print('Бот запущен')
