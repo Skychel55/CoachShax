@@ -39,6 +39,9 @@ class BookingForm(StatesGroup):
     day = State()
     time = State()
 
+class CheckForm(StatesGroup):
+    phone = State()
+ 
 @dp.message(Command('start'))
 async def start(message: Message):
     await message.answer('Привет. Я бот Coach Shax. Выбери действие:', reply_markup=main_menu)
@@ -57,8 +60,19 @@ async def socials(message: Message):
     await message.answer("📱 Мои соцсети:\n\nInstagram: https://www.instagram.com/coach_shax\nTikTok: https://www.tiktok.com/@coach_shax\nTelegram: https://t.me/CoachShax")
 @dp.message(F.text == '💰 Мои тренировки')
 async def my_sessions(message: Message):
-    await message.answer('Для просмотра ваших тренировок обратитесь к тренеру.')
+    await state.set_state(CheckForm.phone)
+    await message.answer("Введите ваш номер телефона:")
 
+@dp.message(CheckForm.phone)
+async def check_sessions(message: Message, state: FSMContext):
+    phone = message.text; rows = sheet.get_all_values(); await state.clear()
+    found = False
+    for row in rows:
+        if len(row) > 1 and phone in row[1]:
+            left = int(row[4])-int(row[5]) if len(row)>5 and row[4] and row[5] else row[4] if len(row)>4 and row[4] else "?"
+            await message.answer("Ваше имя: " + row[0] + "\nОсталось тренировок: " + str(left)); found = True; break
+    if not found: await message.answer("Номер не найден. Обратитесь к тренеру.")
+    if not found: await message.answer("Номер не найден. Обратитесь к тренеру.")
 @dp.message(F.text == '📅 Записаться на тренировку')
 async def booking_start(message: Message, state: FSMContext):
     await state.set_state(BookingForm.name)
