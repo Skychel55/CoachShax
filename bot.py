@@ -157,7 +157,7 @@ async def main():
     setup_application(app,dp,bot=bot)
     runner=web.AppRunner(app)
     await runner.setup()
-    site=web.TCPSite(runner,host="0.0.0.0",port=8080)
+    site=web.TCPSite(runner,host="0.0.0.0",port=int(os.environ.get("PORT",8080)))
     await site.start()
     await asyncio.Event().wait()
 
