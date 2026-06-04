@@ -73,7 +73,7 @@ async def packages(message: Message):
 async def socials(message: Message):
     await message.answer("📱 Мои соцсети:\n\nInstagram: https://www.instagram.com/coach_shax\nTikTok: https://www.tiktok.com/@coach_shax\nTelegram: https://t.me/CoachShax")
 @dp.message(F.text == '💰 Мои тренировки')
-async def my_sessions(message: Message):
+async def my_sessions(message: Message, state: FSMContext):
     await state.set_state(CheckForm.phone)
     await message.answer("Введите ваш номер телефона:")
 
