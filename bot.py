@@ -16,7 +16,7 @@ from aiogram.fsm.storage.memory import MemoryStorage
 
 SCOPES=["https://spreadsheets.google.com/feeds","https://www.googleapis.com/auth/drive"]
 import json as _json
-creds=Credentials.from_service_account_info(_json.loads(os.getenv("GOOGLE_CREDENTIALS","{}")),scopes=SCOPES)
+creds=Credentials.from_service_account_info(_json.loads(os.environ["GOOGLE_CREDENTIALS"]),scopes=SCOPES)
 gs=gspread.authorize(creds)
 sheet=gs.open_by_key("10GU7L3gD840tNQemw8jrxegn454PqxwYIfvjm_ZAByg").sheet1
 
@@ -151,7 +151,7 @@ async def clients_list(message: Message):
 async def main():
     session = AiohttpSession()
     print('Бот запущен')
-    await bot.set_webhook("https://coachshax-production.up.railway.app/webhook")
+    await bot.set_webhook("https://coachshax.onrender.com/webhook")
     app=web.Application()
     SimpleRequestHandler(dispatcher=dp,bot=bot).register(app,path="/webhook")
     setup_application(app,dp,bot=bot)
