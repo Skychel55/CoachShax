@@ -14,6 +14,20 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.storage.memory import MemoryStorage
 
+import threading
+import urllib.request
+import time
+
+def keep_alive():
+    while True:
+        try:
+            urllib.request.urlopen("https://coachshax.onrender.com")
+        except:
+            pass
+        time.sleep(600)
+
+threading.Thread(target=keep_alive, daemon=True).start()
+
 SCOPES=["https://spreadsheets.google.com/feeds","https://www.googleapis.com/auth/drive"]
 import json as _json
 creds=Credentials.from_service_account_info(_json.loads(os.environ["GOOGLE_CREDENTIALS"]),scopes=SCOPES)
