@@ -52,6 +52,7 @@ class BookingForm(StatesGroup):
     who = State()
     day = State()
     time = State()
+    training_type = State()
 
 class CheckForm(StatesGroup):
     phone = State()
@@ -89,9 +90,19 @@ async def check_sessions(message: Message, state: FSMContext):
     if not found: await message.answer("Номер не найден. Обратитесь к тренеру.")
 @dp.message(F.text == '📅 Записаться на тренировку')
 async def booking_start(message: Message, state: FSMContext):
+    await state.set_state(BookingForm.training_type)
+    type_kb = ReplyKeyboardMarkup(keyboard=[
+        [KeyboardButton(text='🏀 Индивидуальная')],
+        [KeyboardButton(text='👥 Split (2 человека)')],
+        [KeyboardButton(text='👥 Групповая (3+)')]
+    ], resize_keyboard=True)
+    await message.answer('Выберите тип тренировки:', reply_markup=type_kb)
+    
+@dp.message(BookingForm.training_type)
+async def booking_training_type(message: Message, state: FSMContext):
+    await state.update_data(training_type=message.text)
     await state.set_state(BookingForm.name)
     await message.answer('Введите ваше ФИО:')
-
 @dp.message(BookingForm.name)
 async def booking_name(message: Message, state: FSMContext):
     await state.update_data(name=message.text)
@@ -135,11 +146,12 @@ async def booking_time(message: Message, state: FSMContext):
     await state.update_data(time=message.text)
     data = await state.get_data()
     await state.clear()
-    summary = f'Заявка принята.\nИмя: {data["name"]}\nТелефон: {data["phone"]}\nДень: {data["day"]}\nВремя: {data["time"]}'
-    sheet.append_row([data["name"], data["phone"], data["day"], data["time"]])
-    await bot.send_message(482803603, "Новая заявка " + data["name"] + " " + data["phone"] + " " + data["day"] + " " + data["time"])
+    training_type = data.get("training_type", "Индивидуальная")
+    summary = f'Заявка принята.\nТип: {training_type}\nИмя: {data["name"]}\nТелефон: {data["phone"]}\nДень: {data["day"]}\nВремя: {data["time"]}'
+    sheet.append_row([data["name"], data["phone"], data["day"], data["time"], "", "", "", training_type])
+    await bot.send_message(482803603, "Новая заявка " + training_type + " " + data["name"] + " " + data["phone"] + " " + data["day"] + " " + data["time"])
     await message.answer(summary, reply_markup=main_menu)
-
+    
 @dp.message(Command("add"))
 async def add_package(message: Message):
     if message.from_user.id != 482803603: return
