@@ -59,7 +59,7 @@ class CheckForm(StatesGroup):
  
 @dp.message(Command('start'))
 async def start(message: Message):
-    await message.answer('Привет. Я бот Coach Shax. Выбери действие:', reply_markup=main_menu)
+    await message.answer('Привет! 👋 Я официальный бот тренера Coach Shax — Егора Шахметова.\n\nВот что я умею:\n\n📅 Записаться на тренировку — выбери тип, день и время\n💰 Мои тренировки — проверь сколько занятий осталось\n📦 Купить пакет — посмотри все варианты и цены\n👤 О тренере — узнай больше о Coach Shax\n📱 Соцсети — Instagram, TikTok, Telegram\n\nВыбери действие 👇', reply_markup=main_menu)
 
 @dp.message(F.text == '👤 О тренере')
 async def about(message: Message):
