@@ -179,6 +179,23 @@ async def clients_list(message: Message):
     for row in rows:
         if row[0]: left = int(row[4])-int(row[5]) if row[4] and row[5] else row[4] if row[4] else "?"; text += row[0] + " - ostalось: " + str(left) + "\n"
     await message.answer(text if len(text) > 15 else "Клиентов пока нет")
+async def send_reminders():
+    while True:
+        now = datetime.now()
+        if now.hour == 9 and now.minute == 0:
+            rows = sheet.get_all_values()[1:]
+            for row in rows:
+                if len(row) > 2 and row[2]:
+                    try:
+                        training_date = datetime.strptime(row[2].split()[0], "%d.%m")
+                        training_date = training_date.replace(year=now.year)
+                        if (training_date - now).days == 1:
+                            time_str = row[3] if len(row) > 3 else ""
+                            name = row[0]
+                            await bot.send_message(482803603, f"⏰ НАПОМИНАНИЕ: Завтра тренировка!\n\nКлиент: {name}\nВремя: {time_str}")
+                    except:
+                        pass
+        await asyncio.sleep(60)
 async def main():
     session = AiohttpSession()
     print('Бот запущен')
@@ -190,6 +207,7 @@ async def main():
     await runner.setup()
     site=web.TCPSite(runner,host="0.0.0.0",port=int(os.environ.get("PORT",8080)))
     await site.start()
+    asyncio.create_task(send_reminders())
     await asyncio.Event().wait()
 
 if __name__ == '__main__':
